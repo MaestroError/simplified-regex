@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "SimplifiedRegex Brings the simplicity and elegance to regular expressions",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "jest",
+    "test": "jest --verbose",
     "test:watch": "jest --watch",
     "build": "webpack --mode production"
   },
