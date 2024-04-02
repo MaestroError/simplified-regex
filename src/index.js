@@ -1,3 +1,3 @@
-import RegexBuilder from "./RegexBuilder";
+import RegexBuilder from "./RegexBuilder.js";
 
 export { RegexBuilder };

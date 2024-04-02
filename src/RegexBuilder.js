@@ -1,4 +1,3 @@
-// src/RegexBuilder.js
 class RegexBuilder {
   constructor() {
     this.pattern = "";
@@ -13,3 +12,5 @@ class RegexBuilder {
     return new RegExp(this.pattern);
   }
 }
+
+export default RegexBuilder;
