@@ -66,15 +66,3 @@ class OptionsBuilder {
 }
 
 export default OptionsBuilder;
-
-// const builder = new OptionsBuilder();
-
-// // Set options using individual methods
-// builder.minLength(3).maxLength(5).exactLength(4);
-
-// // Set options using an object
-// builder.setOptions({ minLength: 2, maxLength: 6 });
-
-// const isValid = builder.validate("test"); // Use the validate method to check input
-
-// console.log(isValid);

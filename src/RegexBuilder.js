@@ -15,6 +15,13 @@ class RegexBuilder extends BasePattern {
     return this;
   }
 
+  checkPattern() {
+    if (this.pattern === undefined || this.pattern === "") {
+      throw new Error("Pattern must be set and cannot be an empty string.");
+    }
+    return true; // Pattern is set and not an empty string
+  }
+
   // Predefined patterns as methods
   email() {
     this.setPattern("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}");
@@ -44,41 +51,30 @@ class RegexBuilder extends BasePattern {
   }
 
   get() {
-    if (!this.pattern) {
-      throw new Error("Pattern must be set before getting matches.");
-    }
-
+    this.checkPattern();
     const matches = this.getAllMatches(this.str);
     return matches; // Returns the matches as an array
   }
 
   check() {
-    if (!this.pattern) {
-      throw new Error("Pattern must be set before performing check.");
-    }
+    this.checkPattern();
     return this.validateInput(this.str);
   }
 
   checkString() {
-    if (!this.pattern) {
-      throw new Error("Pattern must be set before performing string check.");
-    }
+    this.checkPattern();
     return this.validateMatches(this.str);
   }
 
   count() {
-    if (!this.pattern) {
-      throw new Error("Pattern must be set before counting matches.");
-    }
+    this.checkPattern();
     const matches = this.getMatches(this.str);
     return matches ? matches.length : 0;
   }
 
   toRegex() {
-    if (!this.pattern) {
-      throw new Error("Pattern must be set before converting to regex.");
-    }
-    return new RegExp(this.pattern, this.expressionFlags);
+    this.checkPattern();
+    return this.pattern;
   }
 
   options(optionsInput) {
