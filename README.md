@@ -1,2 +1,3 @@
 # simplified-regex
-Brings the simplicity and elegance to regular expressions
+
+SimplifiedRegex Brings the simplicity and elegance to regular expressions
