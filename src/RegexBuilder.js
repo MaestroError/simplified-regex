@@ -81,6 +81,26 @@ class RegexBuilder extends BasePattern {
     return new RegExp(this.pattern, this.expressionFlags);
   }
 
+  options(optionsInput) {
+    // Check if optionsInput is an object
+    if (
+      typeof optionsInput === "object" &&
+      optionsInput !== null &&
+      !Array.isArray(optionsInput)
+    ) {
+      this.processOptionsArray(optionsInput);
+    }
+    // Check if optionsInput is a function (callback)
+    else if (typeof optionsInput === "function") {
+      this.processOptionsCallback(optionsInput);
+    } else {
+      throw new Error(
+        "Invalid input for options. Expected an object or a callback function."
+      );
+    }
+    return this;
+  }
+
   asCaseInsensitive() {
     this.addExpressionFlag("i");
     return this;

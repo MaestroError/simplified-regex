@@ -57,3 +57,41 @@ describe("RegexBuilder Main API Methods", () => {
     expect(regex.flags).toContain("g"); // Check the flags
   });
 });
+
+describe("RegexBuilder Options", () => {
+  let regexBuilder;
+
+  beforeEach(() => {
+    regexBuilder = new RegexBuilder();
+  });
+
+  test("options method applies options correctly using an object", () => {
+    // Assuming setPattern sets a pattern that matches any string
+    regexBuilder.setPattern(".+");
+    // Applying minLength option using an object
+    regexBuilder.options({ minLength: 5 });
+
+    const inputShort = "1234"; // Shorter than minLength
+    const inputValid = "12345"; // Exactly minLength
+
+    expect(regexBuilder.source(inputShort).check()).toBeFalsy();
+    expect(regexBuilder.source(inputValid).check()).toBeTruthy();
+  });
+
+  test("options method applies options correctly using a callback", () => {
+    // Assuming setPattern sets a pattern that matches any string
+    regexBuilder.setPattern(".+");
+    // Applying minLength option using a callback
+    regexBuilder.options((opts) => {
+      opts.minLength(5);
+    });
+
+    const inputShort = "123"; // Shorter than minLength
+    const inputValid = "123456"; // Longer than minLength, valid
+
+    expect(regexBuilder.source(inputShort).check()).toBeFalsy();
+    expect(regexBuilder.source(inputValid).check()).toBeTruthy();
+  });
+
+  // Add more tests as needed for other options or combinations of options
+});

@@ -25,6 +25,10 @@ class BasePattern {
     this.optionsBuilder.setOptions(options);
   }
 
+  setOptionsObject(optionsFromTempBuilder) {
+    this.optionsBuilder.setOptionsFromTempBuilder(optionsFromTempBuilder);
+  }
+
   // Accept an option instance and delegate to OptionsBuilder
   setOption(name, value) {
     this.optionsBuilder.setOption(name, value);
@@ -91,20 +95,20 @@ class BasePattern {
     return this.optionsBuilder.validate(input);
   }
 
-  processArguments(args, values) {
-    const options = {};
-    args.forEach((arg, index) => {
-      if (values[index]) {
-        options[arg] = values[index];
-      }
-    });
-    return options;
+  processOptionsArray(optionsObject) {
+    // Here, directly utilize setOptions from BasePattern or manipulate as needed
+    this.setOptions(optionsObject);
   }
 
-  processCallback(callback) {
-    const optionsBuilder = new OptionsBuilder();
-    callback(optionsBuilder);
-    return optionsBuilder.getOptions();
+  processOptionsCallback(optionsCallback) {
+    // Initialize a temporary OptionsBuilder instance to capture the options set by the callback
+    const tempOptionsBuilder = new OptionsBuilder();
+    // Execute the callback with the temporary OptionsBuilder as its argument
+    optionsCallback(tempOptionsBuilder);
+    // Now, apply the options captured by the temporary OptionsBuilder to this RegexBuilder instance
+    // This assumes that setOptions can handle the result of tempOptionsBuilder.getOptions()
+    const options = tempOptionsBuilder.getOptions();
+    this.setOptionsObject(options);
   }
 
   addExpressionFlag(flag) {

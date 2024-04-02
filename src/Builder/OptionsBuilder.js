@@ -37,6 +37,12 @@ class OptionsBuilder {
     return this;
   }
 
+  // Set options using an object
+  setOptionsFromTempBuilder(optionsObject) {
+    this.options = optionsObject;
+    return this;
+  }
+
   // Set a single option using a name and value
   setOption(name, value) {
     if (this[name] && typeof this[name] === "function") {
