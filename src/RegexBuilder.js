@@ -50,18 +50,27 @@ class RegexBuilder extends BasePattern {
     return this;
   }
 
-  get() {
+  get(source = "") {
+    if (source.length > 0) {
+      this.source(source);
+    }
     this.checkPattern();
     const matches = this.getAllMatches(this.str);
     return matches; // Returns the matches as an array
   }
 
-  check() {
+  check(source = "") {
+    if (source.length > 0) {
+      this.source(source);
+    }
     this.checkPattern();
     return this.validateInput(this.str);
   }
 
-  checkString() {
+  checkString(source = "") {
+    if (source.length > 0) {
+      this.source(source);
+    }
     this.checkPattern();
     return this.validateMatches(this.str);
   }
