@@ -1,8 +1,8 @@
 // Import methods
-import SpecificChars from "./BuilderMethods/SpecificChars";
-import CharacterClasses from "./BuilderMethods/CharacterClasses";
-import Groups from "./BuilderMethods/Groups";
-import Anchors from "./BuilderMethods/Anchors";
+import SpecificChars from "./BuilderMethods/SpecificChars.js";
+import CharacterClasses from "./BuilderMethods/CharacterClasses.js";
+import Groups from "./BuilderMethods/Groups.js";
+import Anchors from "./BuilderMethods/Anchors.js";
 
 // Mixin with builder methods
 const builderMethodsMixin = {

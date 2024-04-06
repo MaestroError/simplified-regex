@@ -23,8 +23,30 @@ class RegexBuilder extends BasePattern {
   }
 
   // Predefined patterns as methods
-  email() {
-    this.setPattern("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}");
+  email(maxLength = null, onlyDomains = [], onlyExtensions = []) {
+    // this.setPattern("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}");
+    const regex = new this.constructor();
+    regex
+      .charSet((reg) => {
+        reg.alphanumeric().underscore().percent().plus().minus();
+      }, "1+")
+      .atSign()
+      .charSet((reg) => {
+        reg.alphanumeric().dot().minus();
+      }, "1+")
+      .dot()
+      .charSet((reg) => {
+        reg.text();
+      }, "2,10");
+
+    this.setPattern(regex.toRegex());
+
+    this.setOptions({
+      maxLength: maxLength,
+      onlyDomains: onlyDomains,
+      onlyExtensions: onlyExtensions,
+    });
+
     return this;
   }
 

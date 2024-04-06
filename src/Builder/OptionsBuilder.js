@@ -153,12 +153,12 @@ class OptionsBuilder {
   // domainSpecific
 
   // Methods to set allowed domains and extensions
-  setAllowedDomains(domains) {
+  onlyDomains(domains) {
     this.options.domainSpecific.setAllowedDomains(domains);
     return this;
   }
 
-  setAllowedExtensions(extensions) {
+  onlyExtensions(extensions) {
     this.options.domainSpecific.setAllowedExtensions(extensions);
     return this;
   }

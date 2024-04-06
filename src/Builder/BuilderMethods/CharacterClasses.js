@@ -126,7 +126,7 @@ const CharacterClasses = {
   },
 
   handleAlphanumeric(length = null, minLength = 0, maxLength = 0) {
-    this.pattern += "[a-zA-Z0-9]"; // Matches alphanumeric characters
+    this.pattern += this.inCharSet ? "a-zA-Z0-9" : "[a-zA-Z0-9]"; // Matches alphanumeric characters
     this.pattern += this.getLengthOption(length, minLength, maxLength);
     return this;
   },
