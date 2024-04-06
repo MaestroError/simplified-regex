@@ -4,11 +4,14 @@ class BasePattern {
   constructor() {
     // Initialize an OptionsBuilder instance to manage pattern options
     this.optionsBuilder = new OptionsBuilder();
+    // String to hold the constructed regex pattern.
     this.pattern = "[a-z]";
-    this.name = "";
-    this.args = [];
-    this.defaultOptions = [];
+    // Regex expression flags like "g"
     this.expressionFlags = "";
+    // Flag to indicate if the next quantifier should be lazy (non-greedy).
+    this.lazy = false;
+    // Flag to indicate that pattern is used inside charSet (Auto remove of extra "[]").
+    this.inCharSet = false;
   }
 
   getPattern() {
@@ -115,6 +118,122 @@ class BasePattern {
     if (!this.expressionFlags.includes(flag)) {
       this.expressionFlags += flag;
     }
+  }
+
+  /**
+   * Applies a quantifier to a given regex pattern.
+   *
+   * @param string $pattern The regex pattern to which the quantifier will be applied.
+   * @param string|null $quantifier The quantifier to apply. Can be 'zeroOrMore', 'oneOrMore', or 'optional'.
+   * @return string The modified pattern with the quantifier applied.
+   */
+  applyQuantifier(pattern, q) {
+    if (!q) {
+      return pattern;
+    }
+
+    let p = pattern;
+    switch (q) {
+      case "zeroOrMore":
+      case "0>":
+      case "0+":
+      case "*":
+        p = `(?:${pattern})*`;
+        break;
+      case "oneOrMore":
+      case "1>":
+      case "1+":
+      case "+":
+        p = `(?:${pattern})+`;
+        break;
+      case "optional":
+      case "?":
+      case "|":
+        p = `(?:${pattern})?`;
+        break;
+      default:
+        if (Number.isInteger(q)) {
+          p = `(?:${pattern}){${q}}`;
+        } else if (/^\d{1,10}$/.test(q)) {
+          p = `(?:${pattern}){${q}}`;
+        } else if (/^\d{1,10},\d{1,10}$/.test(q)) {
+          const range = q.split(",");
+          p = `(?:${pattern}){${range[0]},${range[1]}}`;
+        }
+        break;
+    }
+
+    return this.lazy ? this.addLazy(p) : p;
+  }
+
+  /**
+   * Generates a regex quantifier string based on length parameters.
+   *
+   * @param int|null $length Exact length for the quantifier.
+   * @param int $minLength Minimum length for the quantifier.
+   * @param int $maxLength Maximum length for the quantifier.
+   * @return string The generated regex quantifier string.
+   */
+  getLengthOption(length = null, minLength = 0, maxLength = 0) {
+    let qntf = "+";
+    if (Number.isInteger(length) && length > 0) {
+      qntf = `{${length}}`;
+    } else if (length === 0 || this.inCharSet) {
+      return "";
+    } else if (minLength > 0 && maxLength > 0) {
+      qntf = `{${minLength},${maxLength}}`;
+    } else if (minLength > 0) {
+      qntf = `{${minLength},}`;
+    } else if (maxLength > 0) {
+      qntf = `{0,${maxLength}}`;
+    }
+
+    return this.lazy ? this.addLazy(qntf) : qntf;
+  }
+
+  /**
+   * Adds a lazy (non-greedy) modifier to a quantifier
+   * and sets $lazy to false for ensuring single use
+   *
+   * @param string $quantifier The quantifier to which the lazy modifier will be added.
+   * @return string The quantifier with the lazy modifier applied.
+   */
+  addLazy(quantifier) {
+    this.lazy = false;
+    return quantifier + "?";
+  }
+
+  /**
+   * Creates a lazy (non-greedy) quantifier for the next method call.
+   *
+   * @return self
+   */
+  asLazy() {
+    this.lazy = true;
+    return this; // Allow chaining
+  }
+
+  isInCharSet() {
+    this.inCharSet = true;
+    return this; // Allow chaining
+  }
+
+  escapeAndAdd(partOfPattern, quantifier = null) {
+    const escapedPart = this.escapeString(partOfPattern);
+    this.pattern += quantifier
+      ? this.applyQuantifier(escapedPart, quantifier)
+      : escapedPart;
+    return this; // Enable chaining
+  }
+
+  escapeString(str) {
+    // RegExp.escape proposal is not yet implemented in JavaScript, so we use a manual escape method.
+    // This method escapes special characters used in regex.
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  escapeArray(arr) {
+    return arr.map((item) => this.escapeString(item));
   }
 }
 
