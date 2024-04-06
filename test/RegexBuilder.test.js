@@ -91,5 +91,16 @@ describe("RegexBuilder Options", () => {
     expect(regexBuilder.source(inputValid).check()).toBeTruthy();
   });
 
-  // Add more tests as needed for other options or combinations of options
+  test("options method applies options correctly using a callback and returns filltered values", () => {
+    // Assuming setPattern sets a pattern that matches any string
+    regexBuilder.setPattern("\\d+\\b");
+    // Applying minLength option using a callback
+    regexBuilder.options((opts) => {
+      opts.minLength(5);
+    });
+
+    const input = "123 12345 15 3687 654123"; // Shorter than minLength
+
+    expect(regexBuilder.source(input).get()).toEqual(["12345", "654123"]);
+  });
 });

@@ -13,6 +13,8 @@ SimplifiedRegex Brings the simplicity and elegance to regular expressions
 
 #### GPT rewriting tips
 
-- Use short messages (rewrite 10-15 methods per prompt)
-- Ask it to write tests and check tests logic manually
-- Giving some starting point (even empty methods) or an example (Even the previously generated code) makes it to generate more precise code and keep consistancy
+- Use short messages (rewrite 10-15 methods per prompt).
+- Ask it to write tests and check tests logic manually.
+- If it goes wrong way, just stop it and tell the correct one.
+- Giving some starting point (even empty methods) or an example (Even the previously generated code) makes it to generate more precise code and keep consistancy.
+- Often GPT does everything correct and the process becomes boring at some moment.
