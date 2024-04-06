@@ -6,6 +6,8 @@ import CharOption from "./../Options/CharOption.js";
 import ContainSpacesOption from "./../Options/ContainSpacesOption.js";
 import CountryCodeOption from "./../Options/CountryCodeOption.js";
 import DomainSpecificOption from "./../Options/DomainSpecificOption.js";
+import FileOption from "./../Options/FileOption.js";
+import HtmlTagsOption from "./../Options/HtmlTagsOption.js";
 
 class OptionsBuilder {
   constructor() {
@@ -17,6 +19,8 @@ class OptionsBuilder {
       containSpaces: new ContainSpacesOption(),
       countryCode: new CountryCodeOption(),
       domainSpecific: new DomainSpecificOption(),
+      file: new FileOption(),
+      htmlTags: new HtmlTagsOption(),
       // ... initialize other option classes
     };
   }
@@ -150,6 +154,34 @@ class OptionsBuilder {
     return this;
   }
 
+  // file
+
+  isFile(extension = null) {
+    this.options.file.isFile(extension);
+    return this;
+  }
+
+  isDirectory(check = true) {
+    this.options.file.isDirectory(check);
+    return this;
+  }
+
+  // htmlTags
+
+  allowTags(tags) {
+    this.options.htmlTags.allowTags(tags);
+    return this;
+  }
+
+  restrictTags(tags) {
+    this.options.htmlTags.restrictTags(tags);
+    return this;
+  }
+
+  //
+  // End option methods
+  //
+  //
   // OptionsBuilder methods:
 
   // Set options using an object
