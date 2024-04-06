@@ -1,14 +1,17 @@
 // OptionsBuilder.js
 import LengthOption from "./../Options/LengthOption.js";
-// ... import other option classes
+import CardTypeOption from "./../Options/CardTypeOption.js";
 
 class OptionsBuilder {
   constructor() {
     this.options = {
       length: new LengthOption(),
+      cardType: new CardTypeOption(),
       // ... initialize other option classes
     };
   }
+
+  // Options:
 
   minLength(length) {
     this.options.length.setMinLength(length);
@@ -24,6 +27,28 @@ class OptionsBuilder {
     this.options.length.setExactLength(length);
     return this;
   }
+
+  onlyVisa() {
+    this.options.cardType.useOnlyVisa();
+    return this;
+  }
+
+  onlyMasterCard() {
+    this.options.cardType.useOnlyMasterCard();
+    return this;
+  }
+
+  onlyAmex() {
+    this.options.cardType.useOnlyAmex();
+    return this;
+  }
+
+  allowCardTypes(types) {
+    this.options.cardType.allowCardTypes(types);
+    return this;
+  }
+
+  // OptionsBuilder methods:
 
   // Set options using an object
   setOptions(optionsObject) {
