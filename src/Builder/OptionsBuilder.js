@@ -8,6 +8,11 @@ import CountryCodeOption from "./../Options/CountryCodeOption.js";
 import DomainSpecificOption from "./../Options/DomainSpecificOption.js";
 import FileOption from "./../Options/FileOption.js";
 import HtmlTagsOption from "./../Options/HtmlTagsOption.js";
+import NumberOption from "./../Options/NumberOption.js";
+import OnlyAlphanumericOption from "./../Options/OnlyAlphanumericOption.js";
+import PathTypeOption from "./../Options/PathTypeOption.js";
+import ProtocolOption from "./../Options/ProtocolOption.js";
+import SpecificCurrenciesOption from "./../Options/SpecificCurrenciesOption.js";
 
 class OptionsBuilder {
   constructor() {
@@ -21,7 +26,11 @@ class OptionsBuilder {
       domainSpecific: new DomainSpecificOption(),
       file: new FileOption(),
       htmlTags: new HtmlTagsOption(),
-      // ... initialize other option classes
+      number: new NumberOption(),
+      onlyAlphanumeric: new OnlyAlphanumericOption(),
+      pathType: new PathTypeOption(),
+      protocol: new ProtocolOption(),
+      specificCurrencies: new SpecificCurrenciesOption(),
     };
   }
 
@@ -175,6 +184,81 @@ class OptionsBuilder {
 
   restrictTags(tags) {
     this.options.htmlTags.restrictTags(tags);
+    return this;
+  }
+
+  // number
+
+  setMinValue(value) {
+    this.options.number.setMinValue(value);
+    return this;
+  }
+
+  setMaxValue(value) {
+    this.options.number.setMaxValue(value);
+    return this;
+  }
+
+  setExactValue(value) {
+    this.options.number.setExactValue(value);
+    return this;
+  }
+
+  // onlyAlphanumeric
+
+  onlyAlphanumeric(value) {
+    this.options.onlyAlphanumeric.onlyAlphanumeric(value);
+    return this;
+  }
+
+  // pathType
+
+  setPathType(value) {
+    this.options.pathType.setPathType(value);
+    return this;
+  }
+
+  // protocol
+
+  onlyProtocol(protocol) {
+    this.options.protocol.onlyProtocol(protocol);
+    return this;
+  }
+
+  onlyHttp(only = true) {
+    this.options.protocol.onlyHttp(only);
+    return this;
+  }
+
+  onlyHttps(only = true) {
+    this.options.protocol.onlyHttps(only);
+    return this;
+  }
+
+  // specificCurrencies
+
+  setSpecificCurrencies(currencies) {
+    this.options.specificCurrencies.setSpecificCurrencies(currencies);
+    return this;
+  }
+
+  onlyUSD() {
+    this.options.specificCurrencies.onlyUSD();
+    return this;
+  }
+
+  onlyEUR() {
+    this.options.specificCurrencies.onlyEUR();
+    return this;
+  }
+
+  onlyGBP() {
+    this.options.specificCurrencies.onlyGBP();
+    return this;
+  }
+
+  onlyGEL() {
+    this.options.specificCurrencies.onlyGEL();
     return this;
   }
 

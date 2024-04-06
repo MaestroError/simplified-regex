@@ -1,4 +1,4 @@
-import LengthOption from "../../src/Options/LengthOption"; // Update the path to where your LengthOption class is located
+import LengthOption from "../../src/Options/LengthOption";
 
 describe("LengthOption", () => {
   let lengthOption;
