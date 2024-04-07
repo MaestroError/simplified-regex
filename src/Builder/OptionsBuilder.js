@@ -177,7 +177,7 @@ class OptionsBuilder {
 
   // htmlTags
 
-  allowTags(tags) {
+  onlyTags(tags) {
     this.options.htmlTags.allowTags(tags);
     return this;
   }
@@ -199,6 +199,16 @@ class OptionsBuilder {
     return this;
   }
 
+  minDigits(value) {
+    this.options.number.setMinValue(value);
+    return this;
+  }
+
+  maxDigits(value) {
+    this.options.number.setMaxValue(value);
+    return this;
+  }
+
   setExactValue(value) {
     this.options.number.setExactValue(value);
     return this;
@@ -213,7 +223,7 @@ class OptionsBuilder {
 
   // pathType
 
-  setPathType(value) {
+  pathType(value) {
     this.options.pathType.setPathType(value);
     return this;
   }
@@ -237,7 +247,7 @@ class OptionsBuilder {
 
   // specificCurrencies
 
-  setSpecificCurrencies(currencies) {
+  specificCurrencies(currencies) {
     this.options.specificCurrencies.setSpecificCurrencies(currencies);
     return this;
   }
