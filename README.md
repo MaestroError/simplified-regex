@@ -10,6 +10,7 @@ SimplifiedRegex Brings the simplicity and elegance to regular expressions
 - Implement options and register in OptionsBuilder +
 - Implement patterns using builderMethodsMixin's methods
 - Add github actions for automated tests
+- Write the Docs in Readme.md file
 
 #### GPT rewriting tips
 

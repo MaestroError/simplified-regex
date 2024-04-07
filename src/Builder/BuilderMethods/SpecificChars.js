@@ -203,6 +203,11 @@ const SpecificChars = {
     return isOpen ? this.openAngleBracket(q) : this.closeAngleBracket(q);
   },
 
+  or(q = null) {
+    this.pattern += "|";
+    return this;
+  },
+
   // Handling for exact, exactly, literal, character, char
   exact(stringOrArray, caseSensitive = true, q = null) {
     return this.handleExact(stringOrArray, caseSensitive, q);

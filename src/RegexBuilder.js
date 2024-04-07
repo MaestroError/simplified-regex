@@ -50,8 +50,116 @@ class RegexBuilder extends BasePattern {
     return this;
   }
 
-  url() {
-    this.setPattern("^(https?://)?([da-z.-]+).([a-z.]{2,6})([/w .-]*)*/?$");
+  url(onlyProtocol = []) {
+    // this.setPattern("(https?://[a-zA-Z0-9.-]+.[a-zA-Z]{2,}(/[a-zA-Z0-9/]*)?)");
+
+    const regex = new this.constructor();
+
+    // Common part of the URL pattern: domain name and optional path
+    regex
+      .exact("http")
+      .exact("s", true, "?")
+      .colon()
+      .forwardSlash()
+      .forwardSlash()
+      .charSet((reg) => {
+        reg.alphanumeric().dot().minus();
+      }, "1+")
+      .dot()
+      .charSet((reg) => {
+        reg.text();
+      }, "2,6") // For simplicity, assuming TLD lengths of 2 to 6 characters
+      .nonCapturingGroup((reg) => {
+        reg.forwardSlash().charSet((reg) => {
+          reg.alphanumeric().hyphen().underscore().forwardSlash();
+        }, "*");
+      }, "?");
+
+    // Assuming setPattern constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    // Here we set the options; modify this part based on how your setOptions method works
+    this.setOptions({
+      onlyProtocol: onlyProtocol,
+    });
+
+    return this;
+  }
+
+  creditCardNumber(cardTypes = "") {
+    const regex = new this.constructor();
+
+    // Define the generic pattern for credit card numbers
+    regex
+      .nonCapturingGroup((reg) => {
+        reg
+          .nonCapturingGroup((reg) => {
+            reg
+              // Visa: Starts with 4
+              .nonCapturingGroup((reg) => {
+                reg.exact("4").digits(3);
+              })
+              .or()
+              // MasterCard: Starts with 51 through 55
+              .nonCapturingGroup((reg) => {
+                reg
+                  .exact("5")
+                  .charSet((reg) => {
+                    reg.exact("1").hyphen().exact("5");
+                  })
+                  .digits(2);
+              })
+              .or()
+              // Discover: Starts with 6011 or 65
+              .nonCapturingGroup((reg) => {
+                reg.exact("6").nonCapturingGroup((reg) => {
+                  reg.exact("011").or().exact("5").digits(2);
+                });
+              });
+          })
+          .charSet((reg) => {
+            reg.hyphen().space();
+          }, "?")
+          .digits(4)
+          .charSet((reg) => {
+            reg.hyphen().space();
+          }, "?")
+          .digits(4)
+          .charSet((reg) => {
+            reg.hyphen().space();
+          }, "?")
+          .digits(4);
+      })
+      .or()
+      // AMEX part:
+      .nonCapturingGroup((reg) => {
+        reg
+          .nonCapturingGroup((reg) => {
+            reg
+              .exact("3")
+              .charSet((reg) => {
+                reg.exact("47");
+              })
+              .digits(2);
+          })
+          .charSet((reg) => {
+            reg.hyphen().space();
+          }, "?")
+          .digits(6)
+          .charSet((reg) => {
+            reg.hyphen().space();
+          }, "?")
+          .digits(5);
+      });
+
+    // Constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    // Set options, including cardTypes which can be used for further validation or filtering
+    this.setOptions({
+      allowCardTypes: cardTypes,
+    });
+
     return this;
   }
 
