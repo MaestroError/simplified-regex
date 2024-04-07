@@ -1,6 +1,6 @@
 {
   "name": "simplified-regex",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SimplifiedRegex Brings the simplicity and elegance to regular expressions",
   "main": "index.js",
   "type": "module",

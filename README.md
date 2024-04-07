@@ -21,6 +21,22 @@ console.log(checkStrong); // True
 console.log(checkWeak); // False
 ```
 
+### Table of Contents
+
+- **[Features](#features)**
+- **[Installation](#installation)**
+- **[Usage](#usage)**
+  - [Importing](#importing)
+  - [Building a Regex](#building-a-regex)
+  - [Using Predefined Patterns](#using-predefined-patterns)
+  - [Options](#options)
+  - [Options List](#options-list)
+- **[Contributing](#contributing)**
+- **[Support](#support)**
+- **[Credits](#credits)**
+- **[Frequently Asked Questions (FAQ)](#frequently-asked-questions-faq)**
+- **[License](#license)**
+
 ## Features
 
 - **Fluent Interface**: Build complex regular expressions using a readable and intuitive syntax.
@@ -440,15 +456,85 @@ Or use QR code:
 
 # Credits
 
+A project SimplifiedRegex is the result of inspiration, assistance, and support from various tools and communities. We would like to extend our heartfelt thanks to the following:
+
 - **[Regexr:](https://regexr.com/)** For being an invaluable tool in the creation and debugging of regex patterns. Its intuitive interface and detailed explanations have made it possible to refine and perfect our regex expressions.
 
 - **[ChatGPT:](https://chat.openai.com/)** For its assistance in covering the full codebase with tests. [ChatGPT's](https://openai.com/) guidance and suggestions have also been important in creation of this documentation and rewriting project code from [EloquentRegex](https://github.com/MaestroError/eloquent-regex) PHP package.
 
 A special thank you goes out to everyone who has contributed to these tools and resources. Your work has not only aided in the development of EloquentRegex but has also contributed to the broader developer community by providing tools and knowledge that empower us all.
 
+# Frequently Asked Questions (FAQ)
+
+### What is SimplifiedRegex?
+
+SimplifiedRegex is a JavaScript package that aims to simplify the process of constructing and managing regular expressions. It provides a fluent API that makes regex patterns more readable and easier to compose, along with ready-to-use patterns for common validation tasks such as email, URL, and credit card number validation.
+
+### How do I install SimplifiedRegex?
+
+You can install SimplifiedRegex using npm or yarn. Here's how you can add it to your project using npm:
+
+```bash
+
+npm install simplified-regex
+```
+
+### Can I use SimplifiedRegex on the client-side?
+
+Absolutely! SimplifiedRegex is designed to work both in Node.js environments and in browsers. You can include it in your frontend projects to leverage its regex capabilities for form validation, input parsing, and more.
+
+### How do I use ready-to-use patterns?
+
+Ready-to-use patterns are available as methods on the `RegexBuilder` class. For instance, to validate an email address, you could do the following:
+
+```javascript
+const { RegexBuilder } = require("simplified-regex");
+const simpleRegex = new RegexBuilder();
+simpleRegex.source("test@example.com").email().check();
+```
+
+### How do I create custom patterns?
+
+Custom patterns can be built by chaining together [methods](https://github.com/MaestroError/simplified-regex/tree/maestro/src/Builder/BuilderMethods) provided by the `RegexBuilder` class. Here's an example of constructing a custom pattern:
+
+```javascript
+const result = new RegexBuilder()
+  .start("Here is my username: User_245")
+  .text()
+  .underscore()
+  .digits()
+  .get(); // ["User_245"]
+```
+
+### Can I apply options to any pattern?
+
+Yes, options can be applied to enhance or refine any pattern. This is accomplished using either direct method chaining or the `options` method for more complex configurations.
+
+### How do I debug my regex patterns?
+
+The `toRegex` method of `RegexBuilder` allows you to obtain the compiled regex pattern as a string. This string can then be tested with tools such as **[Regexr:](https://regexr.com/)** to debug and further refine your pattern.
+
+### How can I contribute to SimplifiedRegex?
+
+Contributions are always welcome! You can contribute by reporting issues, suggesting features, or submitting pull requests through the GitHub repository. Please follow the project's contribution guidelines when submitting your contributions.
+
+### Where can I report issues or request features?
+
+For issues or feature requests, please use the Issues section of the GitHub repository. Provide clear and detailed information to help us understand and address your concern effectively.
+
+### How do I stay updated on SimplifiedRegex developments?
+
+To stay informed about the latest updates and developments, you can star or watch the GitHub repository or follow the [author's page](https://www.linkedin.com/in/maestroerror/). This will keep you in the loop for new releases, features, and discussions related to SimplifiedRegex.
+
 # License
 
 SimplifiedRegex is licensed under the MIT License. See the LICENSE file for more details.
+
+---
+
+#### Future plans
+
+- Extend String's prototype and add `simpleRegex()` method that will return `regexBuilder` and take the String as source.
 
 #### To Do
 
@@ -459,7 +545,7 @@ SimplifiedRegex is licensed under the MIT License. See the LICENSE file for more
 - Implement patterns using builderMethodsMixin's methods +
 - Add github actions for automated tests +
 - Write the Docs in Readme.md file +
-- Extend docs
+- Extend docs +
 
 ##### GPT rewriting tips
 
