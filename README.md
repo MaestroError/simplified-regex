@@ -11,6 +11,7 @@ You can use all regex features without writing actual regex pattern. Let me show
 ```javascript
 const regex = new RegexBuilder();
 
+// Check 2 passwords:
 const strongPassword = "StrongP@ssw0rd";
 const weakPassword = "password123";
 // 8 (minLength), 1 (minUppercase), 1 (minDigits), 1 (minSpecialChars)
