@@ -20,7 +20,7 @@ class OptionsBuilder {
       length: new LengthOption(),
       cardType: new CardTypeOption(),
       character: new CharacterOption(),
-      char: new CharOption(),
+      charOption: new CharOption(),
       containSpaces: new ContainSpacesOption(),
       countryCode: new CountryCodeOption(),
       domainSpecific: new DomainSpecificOption(),
@@ -145,7 +145,7 @@ class OptionsBuilder {
 
   // countryCode
 
-  setCountryCode(code) {
+  countryCode(code) {
     this.options.countryCode.setCountryCode(code);
     return this;
   }

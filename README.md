@@ -19,3 +19,4 @@ SimplifiedRegex Brings the simplicity and elegance to regular expressions
 - If it goes wrong way, just stop it and tell the correct one.
 - Giving some starting point (even empty methods) or an example (Even the previously generated code) makes it to generate more precise code and keep consistancy.
 - Often GPT does everything correct and the process becomes boring at some moment.
+- After extensive use it starts hallucination

@@ -104,3 +104,113 @@ describe("RegexBuilder Options", () => {
     expect(regexBuilder.source(input).get()).toEqual(["12345", "654123"]);
   });
 });
+
+describe("Custom Pattern Tests", () => {
+  test("extracts dates in specific format from text", () => {
+    const regexBuilder = new RegexBuilder();
+    const matches = regexBuilder
+      .start("Meeting on 2021-09-15 and 2021-10-20")
+      .digits(4)
+      .dash()
+      .digits(2)
+      .dash()
+      .digits(2)
+      .get();
+
+    expect(matches).toEqual(["2021-09-15", "2021-10-20"]);
+  });
+
+  test("validates usernames in a string", () => {
+    const regexBuilder = new RegexBuilder();
+    const matches = regexBuilder
+      .start("Users: user_123, JohnDoe_99")
+      .alphanumeric()
+      .underscore()
+      .digitsRange(0, 2)
+      .wordBoundary()
+      .get();
+
+    expect(matches).toEqual(["JohnDoe_99"]);
+  });
+});
+
+describe("Predefined Pattern Tests", () => {
+  test("validates email addresses correctly", () => {
+    const email = "test@example.com";
+    const regexBuilder = new RegexBuilder();
+    const isValid = regexBuilder.start(email).email().check();
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates domain names correctly", () => {
+    const domain = "example.com";
+    const regexBuilder = new RegexBuilder();
+    const isValid = regexBuilder.start(domain).domainName().check();
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates credit card numbers correctly", () => {
+    const regexBuilder = new RegexBuilder();
+    const creditCardNumber = "4111111111111111"; // Visa test number
+    regexBuilder.creditCardNumber();
+    const isValid = regexBuilder.check(creditCardNumber);
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates currency formats correctly", () => {
+    const regexBuilder = new RegexBuilder();
+    const currency = "$100.00";
+    regexBuilder.currency();
+    const isValid = regexBuilder.check(currency);
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates dates correctly", () => {
+    const regexBuilder = new RegexBuilder();
+    const date = "2023-01-01";
+    regexBuilder.date();
+    const isValid = regexBuilder.check(date);
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates IPv4 addresses correctly", () => {
+    const regexBuilder = new RegexBuilder();
+    const ipAddress = "192.168.1.1";
+    regexBuilder.ipAddress();
+    const isValid = regexBuilder.check(ipAddress);
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates IPv6 addresses correctly", () => {
+    const regexBuilder = new RegexBuilder();
+    const ipv6Address = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
+    regexBuilder.ipv6Address();
+    const isValid = regexBuilder.check(ipv6Address);
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates phone numbers correctly", () => {
+    const regexBuilder = new RegexBuilder();
+    const phoneNumber = "+1 (123) 456-7890";
+    regexBuilder.phone();
+    const isValid = regexBuilder.check(phoneNumber);
+
+    expect(isValid).toBeTruthy();
+  });
+
+  test("validates usernames correctly", () => {
+    const regexBuilder = new RegexBuilder();
+    const username = "user_123";
+    regexBuilder.username();
+    const isValid = regexBuilder.check(username);
+
+    expect(isValid).toBeTruthy();
+  });
+});

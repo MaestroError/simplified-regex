@@ -369,6 +369,210 @@ const patternsMixin = {
 
     return this;
   },
+
+  ipAddress() {
+    const regex = new this.constructor();
+
+    // Start constructing the IPv4 pattern
+    regex
+      .wordBoundary() // Start of the boundary for the IP address
+      .nonCapturingGroup((reg) => {
+        reg
+          // Match the first three octets
+          .nonCapturingGroup((reg) => {
+            reg
+              .exact("25")
+              .charSet((reg) => {
+                reg.addRawRegex("0-5");
+              })
+              .or()
+              .exact("2")
+              .charSet((reg) => {
+                reg.addRawRegex("0-4");
+              })
+              .charSet((reg) => {
+                reg.addRawRegex("0-9");
+              })
+              .or()
+              .charSet((reg) => {
+                reg.addRawRegex("01");
+              }, "?")
+              .charSet((reg) => {
+                reg.addRawRegex("0-9");
+              })
+              .charSet((reg) => {
+                reg.addRawRegex("0-9");
+              }, "?")
+              .dot();
+          }, "3")
+          .nonCapturingGroup((reg) => {
+            reg
+              .exact("25")
+              .charSet((reg) => {
+                reg.addRawRegex("0-5");
+              })
+              .or()
+              .exact("2")
+              .charSet((reg) => {
+                reg.addRawRegex("0-4");
+              })
+              .charSet((reg) => {
+                reg.addRawRegex("0-9");
+              })
+              .or()
+              .charSet((reg) => {
+                reg.addRawRegex("01");
+              }, "?")
+              .charSet((reg) => {
+                reg.addRawRegex("0-9");
+              })
+              .charSet((reg) => {
+                reg.addRawRegex("0-9");
+              }, "?");
+          });
+      })
+      .wordBoundary(); // End of the boundary for the IP address
+
+    // Constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    // As there are no specific arguments for this pattern, we don't need to pass any options
+    return this;
+  },
+
+  ipv6Address() {
+    const regex = new this.constructor();
+
+    // Start constructing the IPv6 pattern
+    regex
+      .wordBoundary() // Start of the boundary for the IPv6 address
+      .nonCapturingGroup((reg) => {
+        reg
+          .addRawRegex("[0-9a-fA-F]{1,4}") // Match hexadecimal digits
+          .colon();
+      }, "7") // Repeat for the first 7 groups
+      .addRawRegex("[0-9a-fA-F]{1,4}")
+      .wordBoundary(); // End of the boundary for the IPv6 address
+
+    // Constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    return this;
+  },
+
+  password(
+    minLength = 0,
+    minUppercase = 0,
+    minDigits = 0,
+    minSpecialChars = 0
+  ) {
+    const regex = new this.constructor();
+
+    // The character set includes alphanumeric characters and specified special characters
+    regex.charSet((reg) => {
+      reg.alphanumeric().addRawRegex('!@#$%^&*(),.?":{}|<>');
+    }, "oneOrMore");
+
+    // Constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    // Directly pass the constraints as options for external validation
+    this.setOptions({
+      minLength: minLength,
+      minUppercase: minUppercase,
+      minDigits: minDigits,
+      minSpecialChars: minSpecialChars,
+    });
+
+    return this;
+  },
+
+  phone(countryCode = "") {
+    const regex = new this.constructor();
+
+    // Start constructing the phone pattern
+    // Part 1: International Prefix
+    regex
+      .nonCapturingGroup((reg) => {
+        reg.addRawRegex("[+\\d]"); // Matches "+" or digit
+      }, "1,4")
+      // Part 2: Optional Separator
+      .charSet((reg) => {
+        reg.space().hyphen();
+      }, "?")
+      // Part 3: Area Code
+      .nonCapturingGroup((reg) => {
+        reg.addRawRegex("[()\\d]"); // Matches "(", ")", or digit
+      }, "1,5")
+      // Part 4: Main Number
+      .addRawRegex("[- \\d]{4,23}"); // Matches combination of space, dash, and digits
+
+    // Constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    // Directly pass the countryCode as an option for external validation
+    this.setOptions({
+      countryCode: countryCode,
+    });
+
+    return this;
+  },
+
+  time() {
+    const regex = new this.constructor();
+
+    // Start constructing the time pattern
+    regex
+      .nonCapturingGroup((reg) => {
+        reg
+          // Match 00-19 or 01-09 with an optional leading '0'
+          .nonCapturingGroup((reg) => {
+            reg.addRawRegex("[01]?[0-9]").or().addRawRegex("2[0-3]");
+          });
+      })
+      .or()
+      // Match minutes
+      .colon()
+      .addRawRegex("[0-5][0-9]")
+      // Optionally match seconds
+      .nonCapturingGroup((reg) => {
+        reg.colon().addRawRegex("[0-5][0-9]");
+      }, "?")
+      // Optionally match AM or PM with an optional leading space
+      .nonCapturingGroup((reg) => {
+        reg.space("?").nonCapturingGroup((reg) => {
+          reg.addRawRegex("AM").or().addRawRegex("PM");
+        });
+      }, "?");
+
+    // Constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    return this;
+  },
+
+  username() {
+    const regex = new this.constructor();
+
+    // Start with a word boundary
+    regex
+      .wordBoundary()
+      // Add character set for the username
+      .charSet((reg) => {
+        reg.alphanumeric().addRawRegex("_-"); // Assuming addRawRegex allows for adding characters directly
+      }, "4,15") // Specify the length constraint
+      // End with a word boundary
+      .wordBoundary()
+      // Add negative lookahead to ensure username isn't followed by special characters
+      .negativeLookAhead((reg) => {
+        reg.addRawRegex("[!@#$%^&*().]"); // List of characters not allowed to follow the username
+      });
+
+    // Constructs the actual regex pattern from the builder and sets it
+    this.setPattern(regex.toRegex());
+
+    return this;
+  },
 };
 
 export default patternsMixin;
