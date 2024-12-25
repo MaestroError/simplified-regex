@@ -463,7 +463,7 @@ A project SimplifiedRegex is the result of inspiration, assistance, and support 
 
 - **[ChatGPT:](https://chat.openai.com/)** For its assistance in covering the full codebase with tests. [ChatGPT's](https://openai.com/) guidance and suggestions have also been important in creation of this documentation and rewriting project code from [EloquentRegex](https://github.com/MaestroError/eloquent-regex) PHP package.
 
-A special thank you goes out to everyone who has contributed to these tools and resources. Your work has not only aided in the development of EloquentRegex but has also contributed to the broader developer community by providing tools and knowledge that empower us all.
+A special thank you goes out to everyone who has contributed to these tools and resources. Your work has not only aided in the development of SimplifiedRegex but has also contributed to the broader developer community by providing tools and knowledge that empower us all.
 
 # Frequently Asked Questions (FAQ)
 
@@ -547,6 +547,16 @@ SimplifiedRegex is licensed under the MIT License. See the LICENSE file for more
 - Add github actions for automated tests +
 - Write the Docs in Readme.md file +
 - Extend docs +
+- Add Character classess and groups in Docs.
+- Add in Basic Usage topic the "Features" docs with both pattern examples
+  - get
+  - check
+  - checkString
+  - count
+  - toRegex
+  - replace
+  - search
+  - searchReverse
 
 ##### GPT rewriting tips
 

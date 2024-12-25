@@ -53,7 +53,7 @@ class BasePattern {
     );
   }
 
-  getMatches(input, returnGroups = false) {
+  getMatches(input, returnGroups = false, namedGroups = false) {
     // Ensure the pattern is compiled with the 'g' flag to find all matches.
     // Also, incorporate any expression flags set previously.
     this.addExpressionFlag("g");
@@ -66,10 +66,18 @@ class BasePattern {
 
     // When returnGroups is true, return an array of objects with 'result' and 'groups'.
     if (returnGroups) {
-      return allMatches.map((match) => ({
-        result: match[0],
-        groups: match.slice(1).map((group) => group || ""), // Ensure undefined groups are returned as empty strings.
-      }));
+      console.log(allMatches);
+      if (namedGroups) {
+        return allMatches.map((match) => ({
+          result: match[0],
+          groups: match.groups,
+        }));
+      } else {
+        return allMatches.map((match) => ({
+          result: match[0],
+          groups: match.slice(1).map((group) => group || ""), // Ensure undefined groups are returned as empty strings.
+        }));
+      }
     } else {
       // When returnGroups is false, validate each match against the options.
       // Since validation might not always be relevant (e.g., specific to whole input validation),

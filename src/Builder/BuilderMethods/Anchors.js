@@ -13,6 +13,16 @@ const Anchors = {
     this.pattern = "\\b" + this.pattern + "\\b";
     return this;
   },
+
+  useStringBeginning() {
+    this.pattern = "^" + this.pattern;
+    return this;
+  },
+
+  useStringEnd() {
+    this.pattern = this.pattern + "$";
+    return this;
+  },
 };
 
 export default Anchors;
