@@ -834,6 +834,343 @@ const matches = new RegexBuilder()
 console.log(matches); // ['და']
 ```
 
+## Character Sets
+
+In regular expressions, character sets are a fundamental concept that allows you to define a set of characters to match within a single position in the input string. SimplifiedRegex provides an intuitive way to work with both positive and negative character sets, enhancing the versatility of your patterns.
+
+<!-- No quantifiers allowed inside set, cause it is parsed as symbols, so 0 (int) should be used where quantifier is enabled -->
+
+#### Positive set (only these characters)
+
+A positive character set matches any one of the characters included within the set. It's specified by enclosing the characters in square brackets `[...]`.
+
+**Example: Matching a Specific Number of Character Sets**
+
+```javascript
+// Matches exactly 3 occurrences of periods or colons
+const result = new RegexBuilder()
+  .start(".:.")
+  .charSet((pattern) => {
+    pattern.period().colon();
+  }, "3")
+  .check();
+// Expected to be true as it matches three instances of either a period or a colon
+```
+
+In this example, the character set `[\.\:]` is created to match either a period `.` or a colon `:` (In charSet **order** of characters **not matter**). The quantifier '3' is applied outside the set to match exactly three occurrences of **any** of these characters.
+
+#### Negative set (all but not these characters)
+
+A negative character set, denoted by `[^...]`, matches any character that is not listed within the brackets.
+
+**Example: Matching a Specific Number of Negative Character Sets**
+
+```javascript
+// Matches a string containing 2 to 4 characters that are not digits
+const result = new RegexBuilder()
+  .start("abcd")
+  .negativeCharSet((pattern) => {
+    // Here, quantifiers inside the set are interpreted as literal symbols
+    // Character classes like "digits", "text", and etc. sets default quantifier (+)
+    // Hence, '0' is used to disable automatic quantifier addition
+    pattern.digits(0);
+  }, "2,4")
+  .check();
+// Expected to be true as it matches between 2 to 4 non-digit characters
+```
+
+## Groups
+
+SimplifiedRegex simplifies the process of creating both capturing and non-capturing groups, allowing you to organize your regex patterns into logical sections and apply quantifiers or assertions to these groups as a whole.
+
+### Capturing Groups
+
+Capturing groups are used to group part of a pattern together and capture the matching text for later use. Note that it returns an array/collection with a different structure when using `get`:
+
+```javascript
+// Matching a date format with capturing the parts as separated groups
+const result = new RegexBuilder()
+  .start("2024-01-30, 2023-02-20")
+  .group((pattern) => {
+    pattern.digits(4); // Year
+  })
+  .dash()
+  .group((pattern) => {
+    pattern.digits(2); // Month
+  })
+  .dash()
+  .group((pattern) => {
+    pattern.digits(2); // Day
+  })
+  .end({ excludeChars: ["4"] })
+  .get();
+
+/**
+ * After excluding the "4" character, it filters out
+ * the "2024-01-30" match and returns only "2023-02-20"
+ * with its capture groups, so you get this array:
+ * [
+ *     {
+ *          "result": "2023-02-20",
+ *          "groups": [
+ *              "2023",
+ *              "02",
+ *              "20"
+ *          ],
+ *     }
+ * ]
+ */
+```
+
+### Named Capturing Groups
+
+It is the same as a capturing group but named and is used to group part of a pattern together and capture the matching text for later use with its name. Note that it returns an array/collection with a different structure when using `get`:
+
+```javascript
+// Matching a date format with capturing the parts as separated groups
+const result = new RegexBuilder()
+  .start("RI-2142, PO-2555")
+  .namedGroup(
+    (pattern) => {
+      return pattern.textUppercase(2);
+    },
+    "project",
+    1
+  )
+  .dash()
+  .namedGroup(
+    (pattern) => {
+      return pattern.digitsRange(2, 4);
+    },
+    "issue",
+    1
+  )
+  .get();
+
+/* Returns:
+[
+    {
+        "result": "RI-2142",
+        "groups": {
+            "project": "RI",
+            "issue": "2142",
+        }
+    },
+    {
+        "result": "PO-2555",
+        "groups": {
+            "project": "PO",
+            "issue": "2555",
+        }
+    }
+]
+ */
+```
+
+### Non-Capturing Groups
+
+Non-capturing groups organize patterns logically without capturing the matched text separately.
+
+```javascript
+// Reproduces an 'alt' html property pattern
+const regex = new RegexBuilder()
+  .start('alt="something"')
+  .exact("alt=")
+  .nonCapturingGroup((pattern) => {
+    pattern.doubleQuote().orPattern((pattern) => {
+      pattern.singleQuote();
+    });
+  })
+  .check(); // True; Regex: alt\=(?:\"|')
+```
+
+### Groups with Quantifier
+
+Both group methods support quantifiers as the second argument. Quantifiers can be applied with the exact same logic as described in the [Applying Quantifiers](#applying-quantifiers) section.
+
+```javascript
+const result = new RegexBuilder()
+  .start("345-45, 125-787, 344643")
+  .nonCapturingGroup((pattern) => {
+    pattern.digits().dash().digits();
+  }, "+") // Using "+" to match One Or More of this group
+  .get();
+// It returns array: ["345-45", "125-787"]
+```
+
+## Conditional matching
+
+Assertion groups allow for conditional matching based on the presence (positive) or absence (negative) of patterns ahead or behind the current match point, without consuming characters from the string, so that anything inside the assertion group will not be added in matches. See examples below:
+
+#### Positive Lookahead and Lookbehind Assertions
+
+_Example: Using lookAhead Assertions_
+
+Matches digits only if they are followed by a 'D'
+
+```javascript
+// Expected to be true as '3' is followed by 'D'
+const result = new RegexBuilder()
+  .start("3D")
+  .digits()
+  .lookAhead((pattern) => {
+    pattern.character("D");
+  })
+  .check();
+// While using "get()" method, 'D' doesn't appear in matches
+```
+
+_Example: Using lookBehind Assertions_
+
+Matches digits only if they are preceded by a 'P'
+
+```javascript
+// Expected to be true as '3' is preceded by 'P'
+const result = new RegexBuilder()
+  .start("P3")
+  .lookBehind((pattern) => {
+    pattern.character("P");
+  })
+  .digits()
+  .check();
+// While using "get()" method, 'P' doesn't appear in matches
+```
+
+#### Negative LookAhead and LookBehind Assertions
+
+Matches digits only if they aren't followed by a '-'
+
+```javascript
+// "3A" returns True
+let string = "3A";
+// "3-" returns False
+string = "3-";
+const result = new RegexBuilder()
+  .start(string)
+  .digits()
+  .negativeLookAhead((pattern) => {
+    pattern.character("-");
+  })
+  .check();
+// While using "get()" method, '-' doesn't appear in matches
+```
+
+_Example: Using negativeLookBehind Assertions_
+
+Matches digits only if they aren't preceded by a '-'
+
+```javascript
+// "A3" returns True
+let string = "A3";
+// "-3" returns False
+string = "-3";
+const result = new RegexBuilder()
+  .start(string)
+  .negativeLookBehind((pattern) => {
+    pattern.character("-");
+  })
+  .digits()
+  .check();
+// While using "get()" method, '-' doesn't appear in matches
+```
+
+## Pattern alternation (orPattern)
+
+Sometimes, you might encounter situations where either one pattern or another is acceptable. For instance, when developing SimplifiedRegex, a key objective was to enable the reproduction of patterns commonly used in [HSA](https://github.com/MaestroError/html-strings-affixer). Consider the `alt` attribute within an HTML tag, which can be followed by either a double " or a single ' quote. This requirement translates into a regex pattern like `alt\=(\"|')`, indicating an exact match for "alt=" followed by either type of quotation mark.
+
+To achieve this with SimplifiedRegex, you can utilize the `orPattern` method:
+
+```javascript
+const regex = new RegexBuilder()
+  .start()
+  .exact("alt=")
+  .group((pattern) => {
+    pattern.doubleQuote().orPattern((pattern) => {
+      pattern.singleQuote();
+    });
+  })
+  .toRegex(); // alt\=(\"|')
+```
+
+In this example, we precisely match "alt=" using the `exact` method. We then create a group with the `group` method and include `doubleQuote` in the group and then `singleQuote` within the orPattern method's callback. This approach ensures the pattern matches either " or '.
+
+The `orPattern` method also accepts a quantifier as its **second argument** (after callback), applying the same quantifier logic as elsewhere in SimplifiedRegex. This feature adds another layer of flexibility, allowing you to specify how many times either pattern should be present.
+
+## Raw Methods
+
+When working with regular expressions, there are times you'll need to insert a segment of raw regex directly into your pattern. This might be due to the complexity of the pattern or simply because you're integrating an existing regex snippet. SimplifiedRegex accommodates this need with specific methods designed to seamlessly integrate raw regex patterns into your larger expressions.
+
+#### Adding Raw Regex Patterns
+
+The `addRawRegex` method allows you to insert any raw regex directly into your pattern. This is particularly useful for incorporating standard regex snippets without modification.
+
+**_Example: Matching a Social Security Number (SSN)_**
+
+```javascript
+// Directly adds a raw regex pattern for an SSN
+const result = new RegexBuilder()
+  .start("123-45-6789")
+  .addRawRegex("\\d{3}-\\d{2}-\\d{4}")
+  .check();
+// Expected to match an SSN format '123-45-6789', but not '123456789'
+```
+
+This method is straightforward and ensures that your SimplifiedRegex pattern can accommodate complex requirements with ease.
+
+#### Wrapping Raw Regex in a Non-Capturing Group
+
+Sometimes, you may want to include a raw regex snippet as part of a larger pattern without capturing its match. The `addRawNonCapturingGroup` method wraps the provided raw regex in a non-capturing group, allowing it to participate in the match without affecting the captured groups.
+
+**_Example: Adding Digits Followed by a Specific Letter_**
+
+```javascript
+// Wraps digits in a non-capturing group and expects an 'A' immediately after
+const result = new RegexBuilder()
+  .source("123A")
+  .addRawNonCapturingGroup("\\d", "oneOrMore")
+  .exact("A")
+  .check();
+// Expected to match '123A' but not 'A123'
+```
+
+## The Lazy Quantifier Method
+
+In the world of regular expressions, greediness refers to the tendency of quantifiers to match as much of the input as possible. However, there are scenarios where you want your pattern to match the smallest possible part of the input that satisfies the pattern, a behavior known as "laziness" or "non-greediness". SimplifiedRegex introduces a straightforward way to apply this concept through the `lazy()` method.
+
+#### How the Lazy Method Works
+
+The `lazy()` method modifies the behavior of quantifiers that follow it in the pattern, making them match as few characters as possible. This is particularly useful when you want to extract specific segments from a larger block of text without capturing unnecessary parts.
+
+**_Example: Extracting "Secret Coded" Messages from Text_**
+
+Consider a situation where you need to extract coded messages enclosed in curly braces and preceded by a specific keyword within a larger text. Using the greedy approach might lead to capturing more text than intended, including text between messages. The `lazy()` method ensures that only the content directly within the braces, following the keyword, is matched.
+
+```javascript
+const text =
+  "Normal text {secret: message one} more text {secret: another hidden text} end";
+const matches = new RegexBuilder()
+  .source(text)
+  .lookBehind((pattern) => {
+    pattern.openCurlyBrace().exact("secret: ");
+  })
+  .lazy()
+  .anyChars()
+  .lookAhead((pattern) => {
+    pattern.closeCurlyBrace();
+  })
+  .get();
+
+// Extracts ['message one', 'another hidden text'] as separate matches
+```
+
+In this example, without the `lazy()` method, the pattern might greedily match from the first `{secret: ` to the last `}`, including everything in between as a single match (`message one} more text {secret: another hidden text`). By applying `lazy()`, the pattern instead matches the smallest possible string that satisfies the pattern within each set of curly braces, effectively separating the messages.
+
+#### When to Use the Lazy Method
+
+The `lazy()` method is invaluable when dealing with patterns that include variable-length content, such as strings or blocks of text, where you aim to extract specific, bounded segments. It's especially useful in parsing structured formats embedded within free text, extracting data from templated content, or any scenario where precision is key to separating multiple matches in a larger string.
+
+By making quantifiers lazy, SimplifiedRegex empowers you to write more precise and effective patterns, ensuring that your matches are exactly as intended, no more and no less.
+
 # Contributing
 
 Contributions are welcome! Whether it's adding new patterns, improving the documentation, or reporting bugs, your help is appreciated.
