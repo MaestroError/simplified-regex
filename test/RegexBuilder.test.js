@@ -213,4 +213,242 @@ describe("Predefined Pattern Tests", () => {
 
     expect(isValid).toBeTruthy();
   });
+
+  test("replaces all texts using replace method", () => {
+    const regexBuilder = new RegexBuilder();
+    const input = "Send to example@email.com or reply to EXAMPLE2@Email.com";
+    const replaced = regexBuilder
+      .start(input)
+      .email()
+      .replace((foundString) => `Email: ${foundString}`);
+
+    expect(replaced).toBe(
+      "Send to Email: example@email.com or reply to Email: EXAMPLE2@Email.com"
+    );
+  });
+
+  test("replaces the same texts using replace method", () => {
+    const regexBuilder = new RegexBuilder();
+    const input = "Send to example@email.com or reply to example@email.com";
+    const replaced = regexBuilder
+      .start(input)
+      .email()
+      .replace((foundString) => `Email: ${foundString}`);
+
+    expect(replaced).toBe(
+      "Send to Email: example@email.com or reply to Email: example@email.com"
+    );
+  });
+
+  test("accepts JavaScript functions in replace method", () => {
+    const regexBuilder = new RegexBuilder();
+    const input = "Send to example-1@email.com or reply to example-2@email.com";
+    const replaced = regexBuilder
+      .start(input)
+      .email()
+      .replace((foundString) => foundString.toUpperCase());
+
+    expect(replaced).toBe(
+      "Send to EXAMPLE-1@EMAIL.COM or reply to EXAMPLE-2@EMAIL.COM"
+    );
+  });
+});
+
+// Search feature tests:
+
+test("searches multiline string using keyword", () => {
+  const regexBuilder = new RegexBuilder();
+  const input = `
+    Whose woods these are I think I know.
+    His house is in the village though;
+    He will not see me stopping here
+    To watch his woods fill up with snow.
+
+    The woods are lovely, dark and deep,
+    But I have promises to keep,
+    And miles to go before I sleep,
+    And miles to go before I sleep.
+  `;
+  const found = regexBuilder.source(input).search("woods");
+
+  expect(found).toEqual([
+    "Whose woods these are I think I know.",
+    "To watch his woods fill up with snow.",
+    "The woods are lovely, dark and deep,",
+  ]);
+});
+
+test("searches multiline string using subpattern with ready-to-use patterns", () => {
+  const regexBuilder = new RegexBuilder();
+  const input = `
+    Please contact us via email at info@example.com for more details.
+    For support inquiries, you can also email us at support@example.com.
+    Our marketing team is reachable at marketing@example.com for collaborations.
+    For urgent matters, you can reach out through the phone number provided.
+    Subscribe to our newsletter to stay updated with the latest news.
+    Feel free to send feedback directly to our office address.
+    Any emails sent after 5 PM may be responded to the next business day.
+    Check the FAQ section for answers to common questions.
+    Social media channels are also available for quick updates.
+    We value your input and encourage you to share your thoughts.
+  `;
+  const found = regexBuilder.source(input).search((pattern) => {
+    pattern.email();
+  });
+
+  expect(found).toEqual([
+    "Please contact us via email at info@example.com for more details.",
+    "For support inquiries, you can also email us at support@example.com.",
+    "Our marketing team is reachable at marketing@example.com for collaborations.",
+  ]);
+});
+
+test("searches multiline string using subpattern with builder pattern methods", () => {
+  const regexBuilder = new RegexBuilder();
+  const input = `
+    Discover the latest tips and tricks to boost your productivity.
+    Join the conversation with #LaravelTips and #WebDevelopment.
+    Stay updated with our blog for more insightful content.
+    Follow us on social media and use #CodingMadeEasy to share your journey.
+    Let’s build something amazing together!
+  `;
+  const found = regexBuilder.source(input).search((pattern) => {
+    pattern.start().hashtag().alphanumeric();
+  });
+
+  expect(found).toEqual([
+    "Join the conversation with #LaravelTips and #WebDevelopment.",
+    "Follow us on social media and use #CodingMadeEasy to share your journey.",
+  ]);
+});
+
+// SearchReverse feature tests:
+test("excludes lines from multiline string using keyword", () => {
+  const regexBuilder = new RegexBuilder();
+  const input = `
+    [2024-12-23 10:00:00] INFO: User logged in.
+    [2024-12-25 10:05:00] ERROR: Unable to connect to database.
+    [2024-12-25 10:10:00] INFO: User updated profile.
+    [2024-12-15 10:15:00] WARNING: Disk space running low.
+    [2024-12-34 10:20:00] ERROR: Timeout while fetching data.
+  `;
+  const found = regexBuilder.source(input).searchReverse("INFO");
+
+  expect(found).toEqual([
+    "[2024-12-25 10:05:00] ERROR: Unable to connect to database.",
+    "[2024-12-15 10:15:00] WARNING: Disk space running low.",
+    "[2024-12-34 10:20:00] ERROR: Timeout while fetching data.",
+  ]);
+});
+
+test("excludes lines from multiline string using subpattern", () => {
+  const regexBuilder = new RegexBuilder();
+  const input = `
+    [2024-12-23 10:00:00] INFO: User logged in.
+    [2024-12-25 10:05:00] ERROR: Unable to connect to database.
+    [2024-12-25 10:10:00] INFO: User updated profile.
+    [2024-12-15 10:15:00] WARNING: Disk space running low.
+    [2024-12-34 10:20:00] ERROR: Timeout while fetching data.
+  `;
+  const found = regexBuilder.source(input).searchReverse((pattern) => {
+    pattern.start().digits(4).dash().digits(2).dash().exact("25");
+  });
+
+  expect(found).toEqual([
+    "[2024-12-23 10:00:00] INFO: User logged in.",
+    "[2024-12-15 10:15:00] WARNING: Disk space running low.",
+    "[2024-12-34 10:20:00] ERROR: Timeout while fetching data.",
+  ]);
+});
+
+// Groups tests:
+test("returns group data correctly (JIRA issue IDs)", () => {
+  const regexBuilder = new RegexBuilder();
+  const found = regexBuilder
+    .start("RI-2142, PO-2555")
+    .group((pattern) => pattern.textUppercase(2), 1)
+    .dash()
+    .group((pattern) => pattern.digitsRange(2, 4), 1)
+    .get();
+
+  expect(found).toEqual([
+    {
+      result: "RI-2142",
+      groups: ["RI", "2142"],
+    },
+    {
+      result: "PO-2555",
+      groups: ["PO", "2555"],
+    },
+  ]);
+});
+
+// Named groups tests:
+test("returns named groups data correctly (JIRA issue IDs)", () => {
+  const regexBuilder = new RegexBuilder();
+  const found = regexBuilder
+    .start("RI-2142, PO-2555")
+    .namedGroup((pattern) => pattern.textUppercase(2), "project", 1)
+    .dash()
+    .namedGroup((pattern) => pattern.digitsRange(2, 4), "issue", 1)
+    .get();
+
+  expect(found).toEqual([
+    {
+      result: "RI-2142",
+      groups: {
+        project: "RI",
+        issue: "2142",
+      },
+    },
+    {
+      result: "PO-2555",
+      groups: {
+        project: "PO",
+        issue: "2555",
+      },
+    },
+  ]);
+});
+
+// Swap tests:
+test("can swap text using callback", () => {
+  const regexBuilder = new RegexBuilder();
+  const result = regexBuilder
+    .start("RI-2142, RI-1234, PO-2555")
+    .namedGroup((pattern) => pattern.textUppercase(2), "project", 1)
+    .dash()
+    .namedGroup((pattern) => pattern.digitsRange(2, 4), "issue", 1);
+
+  const results = result.swap((data) => {
+    return `The issue #${data.issue} of project ${data.project} is in progress`;
+  });
+
+  expect(results).toEqual([
+    "The issue #2142 of project RI is in progress",
+    "The issue #1234 of project RI is in progress",
+    "The issue #2555 of project PO is in progress",
+  ]);
+});
+
+test("can swap text using pattern string", () => {
+  const regexBuilder = new RegexBuilder();
+  const result = regexBuilder
+    .start(
+      "/container-tbilisi-1585, /container-berlin-1234, /container-tbilisi-2555"
+    )
+    .slash()
+    .exact("container")
+    .dash()
+    .namedGroup((pattern) => pattern.text(), "City")
+    .dash()
+    .namedGroup((pattern) => pattern.digitsRange(2, 5), "id");
+
+  const results = result.swap("/container/[ID]?city=[CITY]");
+
+  expect(results).toEqual([
+    "/container/1585?city=tbilisi",
+    "/container/1234?city=berlin",
+    "/container/2555?city=tbilisi",
+  ]);
 });

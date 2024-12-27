@@ -18,9 +18,20 @@ const Groups = {
   },
 
   group(callback, q = null) {
+    this.setReturnGroups(true);
     const subPattern = new this.constructor();
     callback(subPattern);
     let p = "(" + subPattern.pattern + ")";
+    this.pattern += q ? this.applyQuantifier(p, q) : p;
+    return this;
+  },
+
+  namedGroup(callback, name, q = null) {
+    this.setReturnGroups(true);
+    this.setNamedGroups(true);
+    const subPattern = new this.constructor();
+    callback(subPattern);
+    let p = `(?<${name}>${subPattern.pattern})`;
     this.pattern += q ? this.applyQuantifier(p, q) : p;
     return this;
   },

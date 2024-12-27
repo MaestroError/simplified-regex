@@ -25,9 +25,17 @@ describe("Groups Methods with Pattern Checks", () => {
 
   test("group wraps pattern in capturing groups", () => {
     const testString = "123-456";
-    regexBuilder.group((rb) => rb.digits(3));
+    regexBuilder
+      .group((rb) => rb.digits(3))
+      .dash()
+      .group((rb) => rb.digits(3));
     const matches = regexBuilder.source(testString).get();
-    expect(matches).toEqual(["123", "456"]); // Expect capturing groups to match '123' and '456'
+    expect(matches).toEqual([
+      {
+        result: "123-456",
+        groups: ["123", "456"],
+      },
+    ]); // Expect capturing groups to match '123' and '456'
   });
 
   test("nonCapturingGroup wraps pattern in non-capturing groups", () => {
