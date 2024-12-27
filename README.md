@@ -28,10 +28,28 @@ console.log(checkWeak); // False
 - **[Installation](#installation)**
 - **[Usage](#usage)**
   - [Importing](#importing)
+  - [Actions](#actions)
+    - [Get](#get)
+    - [Check](#check)
+    - [CheckString](#checkstring)
+    - [Count](#count)
+    - [Replace](#replace)
+    - [ToRegex](#toregex)
+    - [Search](#search)
+    - [SearchReverse](#searchreverse)
+    - [Swap](#swap)
   - [Building a Regex](#building-a-regex)
   - [Using Predefined Patterns](#using-predefined-patterns)
   - [Options](#options)
   - [Options List](#options-list)
+- **[Advanced topics](#advanced-topics)**
+  - [Regex Flags](#regex-flags)
+  - [Character Sets](#character-sets)
+  - [Groups](#groups)
+  - [Conditional matching](#conditional-matching)
+  - [Pattern alternation (orPattern)](#pattern-alternation-orpattern)
+  - [Raw Methods](#raw-methods)
+  - [The Lazy Quantifier Method](#the-lazy-quantifier-method)
 - **[Contributing](#contributing)**
 - **[Support](#support)**
 - **[Credits](#credits)**
@@ -84,6 +102,291 @@ For ES modules or TypeScript, use:
 
 ```javascript
 import { RegexBuilder } from "simplified-regex";
+```
+
+### Actions
+
+Actions are end methods created to finalize your pattern and take some action with it. They are the main features of the package as well. Let's discuss them one by one and check the examples.
+
+#### Get
+
+Returns all matches as an array/collection. Returns `null` if no matches are found.
+
+_Example with ready-to-use pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .source("Support: support@example.com; Info: info@example.com")
+  .email()
+  .get();
+// Returns: ["support@example.com", "info@example.com"]
+```
+
+_Example with custom pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .start("#hello #world This is a #test")
+  .hash()
+  .text()
+  .get();
+// Returns: ['#hello', '#world', '#test']
+```
+
+#### Check
+
+Checks if the string exactly matches the pattern from start to end (strict match).
+
+_Example with ready-to-use pattern_
+
+```javascript
+const result = new RegexBuilder().source("support@example.com").email().check();
+// Returns: true
+```
+
+_Example with custom pattern_
+
+```javascript
+const result = new RegexBuilder().start("#test").hash().text().check();
+// Returns: true
+```
+
+#### CheckString
+
+Checks if the string contains any matches of the pattern. In the case of the email pattern, it will return `true` if one or more emails are present in the given source string.
+
+_Example with ready-to-use pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .source("Support: support@example.com; Info: info@example.com")
+  .email()
+  .checkString();
+// Returns: true
+```
+
+_Example with custom pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .start("#hello #world This is a #test")
+  .hash()
+  .text()
+  .checkString();
+// Returns: true
+```
+
+### Count
+
+Counts the number of matches and returns it as an integer. Returns `0` if no matches are found.
+
+_Example with ready-to-use pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .source("Support: support@example.com; Info: info@example.com")
+  .email()
+  .count();
+// Returns: 2
+```
+
+_Example with custom pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .start("#hello #world This is a #test")
+  .hash()
+  .text()
+  .count();
+// Returns: 3
+```
+
+### Replace
+
+Replaces found matches in the given source string using the provided **callback**.
+
+_Example with ready-to-use pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .source("Support: support@example.com; Info: info@example.com")
+  .email()
+  .replace((foundItem) => {
+    return `<span>${foundItem}</span>`;
+  });
+// Returns: "Support: <span>support@example.com</span>; Info: <span>info@example.com</span>"
+```
+
+_Example with custom pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .start("This is a #test")
+  .hash()
+  .text()
+  .replace((foundItem) => {
+    return `<a href='${foundItem}'>${foundItem}</a>`;
+  });
+// Returns: "This is a <a href='#test'>#test</a>"
+```
+
+### ToRegex
+
+Returns the built raw regex as a string. If any [options](#options) are applied, they will **not be included** in the `toRegex` method.
+
+_Example with custom pattern_
+
+```javascript
+const regex = new RegexBuilder()
+  .start()
+  .textLowercase()
+  .atSign()
+  .textLowercase()
+  .dot()
+  .textLowercaseRange(2, 4)
+  .toRegex();
+// Returns: "[a-z]+@[a-z]+\.[a-z]{2,4}"
+```
+
+### Search
+
+The `search` method searches for a **keyword** or **pattern** (including ready-to-use patterns) in multiline text and returns lines where the subject is found. It is especially useful for processing large files like logs or JSON.
+
+_Example with keyword search_
+
+```javascript
+const result = new RegexBuilder()
+  .source(
+    `
+    Whose woods these are I think I know.
+    His house is in the village though;
+    He will not see me stopping here
+    To watch his woods fill up with snow.
+
+    The woods are lovely, dark and deep,
+    But I have promises to keep,
+    And miles to go before I sleep,
+    And miles to go before I sleep.
+  `
+  )
+  .search("woods");
+/* Returns: [
+    "Whose woods these are I think I know.",
+    "To watch his woods fill up with snow.",
+    "The woods are lovely, dark and deep,"
+] */
+```
+
+_Example with pattern_
+
+```javascript
+const result = new RegexBuilder()
+  .source(
+    `
+    Please contact us via email at info@example.com for more details.
+    For support inquiries, you can also email us at support@example.com.
+    Our marketing team is reachable at marketing@example.com for collaborations.
+    For urgent matters, you can reach out through the phone number provided.
+    Subscribe to our newsletter to stay updated with the latest news.
+    Feel free to send feedback directly to our office address.
+    Any emails sent after 5 PM may be responded to the next business day.
+    Check the FAQ section for answers to common questions.
+    Social media channels are also available for quick updates.
+    We value your input and encourage you to share your thoughts.
+  `
+  )
+  .search((pattern) => {
+    pattern.email();
+  });
+/* Returns: [
+    'Please contact us via email at info@example.com for more details.',
+    'For support inquiries, you can also email us at support@example.com.',
+    'Our marketing team is reachable at marketing@example.com for collaborations.'
+] */
+```
+
+### SearchReverse
+
+The `searchReverse` method searches for a **keyword** or **pattern** in multiline text and returns every line which **doesn't contain** the subject. It is especially useful for processing large text files like logs or JSON.
+
+_Example with keyword search_
+
+```javascript
+// Find all log types except INFO
+const result = new RegexBuilder()
+  .source(
+    `
+    [2024-12-23 10:00:00] INFO: User logged in.
+    [2024-12-25 10:05:00] ERROR: Unable to connect to database.
+    [2024-12-25 10:10:00] INFO: User updated profile.
+    [2024-12-15 10:15:00] WARNING: Disk space running low.
+    [2024-12-34 10:20:00] ERROR: Timeout while fetching data.
+  `
+  )
+  .searchReverse("INFO");
+/* Returns: [
+    '[2024-12-25 10:05:00] ERROR: Unable to connect to database.',
+    '[2024-12-15 10:15:00] WARNING: Disk space running low.',
+    '[2024-12-34 10:20:00] ERROR: Timeout while fetching data.'
+] */
+```
+
+### Swap
+
+The `swap` method allows you to swap any kind of data logically, for example, build new URLs from old ones. It utilizes the "named groups" regex feature and can be used with a **callback** or **pattern string**.
+
+_Example with pattern string_
+
+```javascript
+const builder = new RegexBuilder()
+  .start(
+    "URIs: /container-tbilisi-1585, /container-berlin-1234, /container-tbilisi-2555"
+  )
+  .slash() // "/"
+  .exact("container") // "container" (static part of URI)
+  .dash() // "-"
+  .namedGroup((pattern) => pattern.text(), "City") // Text between dashes, Grouped & named as "City"
+  .dash() // "-"
+  .namedGroup((pattern) => pattern.digitsRange(2, 5), "id") // Numbers at end, Grouped & named as "id"
+  .end(); // Ends custom pattern to make "swap" method available
+
+// Using swap with pattern string
+// which will swap placeholders like "[ID]" with
+// Extracted data for each found match
+const result = builder.swap("/container/[ID]?city=[CITY]");
+
+/* Returns:
+[
+    '/container/1585?city=tbilisi',
+    '/container/1234?city=berlin',
+    '/container/2555?city=tbilisi'
+]
+*/
+```
+
+_Example with callback_
+
+```javascript
+const builder = new RegexBuilder().start(
+  "Issues in progress: RI-2142, RI-1234, PO-2555"
+);
+builder
+  .namedGroup((pattern) => pattern.textUppercase(2), "project", 1) // 2 uppercase char named as "project"
+  .dash() // "-"
+  .namedGroup((pattern) => pattern.digitsRange(2, 4), "issue", 1) // from 2 to 4 digits named as "issue"
+  .end();
+
+const results = builder.swap((data) => {
+  return `The issue #${data.issue} of project ${data.project} is in progress`;
+});
+
+/* Returns:
+[
+    'The issue #2142 of project RI is in progress',
+    'The issue #1234 of project RI is in progress',
+    'The issue #2555 of project PO is in progress'
+]
+*/
 ```
 
 ### Building a Regex
@@ -440,6 +743,96 @@ onlyAlphanumeric(value); // Ensure only alphanumeric characters are included
 ```
 
 These options enhance the functionality and flexibility of `SimplifiedRegex`, enabling you to tailor regex patterns to meet specific requirements or constraints. Whether you're validating user input, parsing text data, or performing complex searches, these options provide the tools you need to achieve precise and efficient regex matching.
+
+# Advanced topics
+
+## Regex Flags🚩
+
+Regex flags are special tokens that modify the behavior of regular expressions, allowing for more flexible and powerful pattern matching. In SimplifiedRegex, applying regex flags to your patterns enables specialized matching behaviors such as case-insensitive searches, multiline matching, single-line mode, and support for Unicode characters. Let's explore how to apply these flags using examples.
+
+### Case-Insensitive Matching
+
+Sometimes, the case of letters in a string should not affect the match. To achieve case-insensitive matching, use the `asCaseInsensitive()` flag.
+
+```javascript
+const string = "Example@Email.COM";
+const checkWithFlag = new RegexBuilder()
+  .source(string)
+  .start()
+  .exact("example")
+  .character("@")
+  .exact("email.com")
+  .end()
+  .asCaseInsensitive()
+  .check();
+
+// With the case-insensitive flag, the match succeeds.
+console.log(checkWithFlag); // true
+```
+
+### Multiline Matching
+
+The multiline flag allows the start (^) and end ($) anchors to match the start and end of lines within a string, rather than the entire string.
+
+**Example: Matching Dates Across Multiple Lines using `check()` method**
+
+```javascript
+const string = "2024-01-30\n2024-02-15\n2024-11-30";
+const matches = new RegexBuilder()
+  .source(string)
+  .start()
+  .digits(4)
+  .dash()
+  .digits(2)
+  .dash()
+  .digits(2)
+  .end()
+  .asMultiline()
+  .check();
+
+console.log(matches); // true
+```
+
+_Note: if you need to check if a string contains a date, using the `checkString()` method is enough. In this example, we are checking that every line is exactly the date._
+
+### Single-Line Mode
+
+In single-line mode, the dot (.) matches every character, including newline characters, allowing patterns to match across lines.
+
+**Example: Matching Text Across Lines as a Single Line String using `check()` method**
+
+```javascript
+const string = "Check out\n this site:";
+const check = new RegexBuilder()
+  .source(string)
+  .start()
+  .anyChars()
+  .character(":")
+  .end()
+  .asSingleline()
+  .check();
+
+console.log(check); // true
+```
+
+### Unicode Character Matching
+
+When working with texts containing Unicode characters, the Unicode flag ensures that character classes such as `\w` (word characters - `wordChars` method) and `\d` (digits - `digits` method) correctly match Unicode characters.
+
+**Example: Matching Text with Unicode Characters**
+
+```javascript
+const string = "მზადაა #1 ✔️ და #2 ✔️";
+const matches = new RegexBuilder()
+  .source(string)
+  .start()
+  .wordCharsRange(0, 2)
+  .end()
+  .asUnicode()
+  .get();
+
+console.log(matches); // ['და']
+```
 
 # Contributing
 
