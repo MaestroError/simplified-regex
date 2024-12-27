@@ -746,7 +746,7 @@ These options enhance the functionality and flexibility of `SimplifiedRegex`, en
 
 # Advanced topics
 
-## Regex Flags🚩
+## Regex Flags
 
 Regex flags are special tokens that modify the behavior of regular expressions, allowing for more flexible and powerful pattern matching. In SimplifiedRegex, applying regex flags to your patterns enables specialized matching behaviors such as case-insensitive searches, multiline matching, single-line mode, and support for Unicode characters. Let's explore how to apply these flags using examples.
 
@@ -870,10 +870,7 @@ A negative character set, denoted by `[^...]`, matches any character that is not
 const result = new RegexBuilder()
   .start("abcd")
   .negativeCharSet((pattern) => {
-    // Here, quantifiers inside the set are interpreted as literal symbols
-    // Character classes like "digits", "text", and etc. sets default quantifier (+)
-    // Hence, '0' is used to disable automatic quantifier addition
-    pattern.digits(0);
+    pattern.digits();
   }, "2,4")
   .check();
 // Expected to be true as it matches between 2 to 4 non-digit characters
@@ -885,7 +882,7 @@ SimplifiedRegex simplifies the process of creating both capturing and non-captur
 
 ### Capturing Groups
 
-Capturing groups are used to group part of a pattern together and capture the matching text for later use. Note that it returns an array/collection with a different structure when using `get`:
+Capturing groups are used to group part of a pattern together and capture the matching text for later use. Note that it returns an array with a different structure when using `get`:
 
 ```javascript
 // Matching a date format with capturing the parts as separated groups
@@ -924,7 +921,7 @@ const result = new RegexBuilder()
 
 ### Named Capturing Groups
 
-It is the same as a capturing group but named and is used to group part of a pattern together and capture the matching text for later use with its name. Note that it returns an array/collection with a different structure when using `get`:
+It is the same as a capturing group but named and is used to group part of a pattern together and capture the matching text for later use with its name. Note that it returns an array with a different structure when using retrieval methods like `get`:
 
 ```javascript
 // Matching a date format with capturing the parts as separated groups
@@ -1135,15 +1132,15 @@ const result = new RegexBuilder()
 
 ## The Lazy Quantifier Method
 
-In the world of regular expressions, greediness refers to the tendency of quantifiers to match as much of the input as possible. However, there are scenarios where you want your pattern to match the smallest possible part of the input that satisfies the pattern, a behavior known as "laziness" or "non-greediness". SimplifiedRegex introduces a straightforward way to apply this concept through the `lazy()` method.
+In the world of regular expressions, greediness refers to the tendency of quantifiers to match as much of the input as possible. However, there are scenarios where you want your pattern to match the smallest possible part of the input that satisfies the pattern, a behavior known as "laziness" or "non-greediness". SimplifiedRegex introduces a straightforward way to apply this concept through the `asLazy()` method.
 
 #### How the Lazy Method Works
 
-The `lazy()` method modifies the behavior of quantifiers that follow it in the pattern, making them match as few characters as possible. This is particularly useful when you want to extract specific segments from a larger block of text without capturing unnecessary parts.
+The `asLazy()` method modifies the behavior of quantifiers that follow it in the pattern, making them match as few characters as possible. This is particularly useful when you want to extract specific segments from a larger block of text without capturing unnecessary parts.
 
 **_Example: Extracting "Secret Coded" Messages from Text_**
 
-Consider a situation where you need to extract coded messages enclosed in curly braces and preceded by a specific keyword within a larger text. Using the greedy approach might lead to capturing more text than intended, including text between messages. The `lazy()` method ensures that only the content directly within the braces, following the keyword, is matched.
+Consider a situation where you need to extract coded messages enclosed in curly braces and preceded by a specific keyword within a larger text. Using the greedy approach might lead to capturing more text than intended, including text between messages. The `asLazy()` method ensures that only the content directly within the braces, following the keyword, is matched.
 
 ```javascript
 const text =
@@ -1153,7 +1150,7 @@ const matches = new RegexBuilder()
   .lookBehind((pattern) => {
     pattern.openCurlyBrace().exact("secret: ");
   })
-  .lazy()
+  .asLazy()
   .anyChars()
   .lookAhead((pattern) => {
     pattern.closeCurlyBrace();
@@ -1163,11 +1160,11 @@ const matches = new RegexBuilder()
 // Extracts ['message one', 'another hidden text'] as separate matches
 ```
 
-In this example, without the `lazy()` method, the pattern might greedily match from the first `{secret: ` to the last `}`, including everything in between as a single match (`message one} more text {secret: another hidden text`). By applying `lazy()`, the pattern instead matches the smallest possible string that satisfies the pattern within each set of curly braces, effectively separating the messages.
+In this example, without the `asLazy()` method, the pattern might greedily match from the first `{secret: ` to the last `}`, including everything in between as a single match (`message one} more text {secret: another hidden text`). By applying `asLazy()`, the pattern instead matches the smallest possible string that satisfies the pattern within each set of curly braces, effectively separating the messages.
 
 #### When to Use the Lazy Method
 
-The `lazy()` method is invaluable when dealing with patterns that include variable-length content, such as strings or blocks of text, where you aim to extract specific, bounded segments. It's especially useful in parsing structured formats embedded within free text, extracting data from templated content, or any scenario where precision is key to separating multiple matches in a larger string.
+The `asLazy()` method is invaluable when dealing with patterns that include variable-length content, such as strings or blocks of text, where you aim to extract specific, bounded segments. It's especially useful in parsing structured formats embedded within free text, extracting data from templated content, or any scenario where precision is key to separating multiple matches in a larger string.
 
 By making quantifiers lazy, SimplifiedRegex empowers you to write more precise and effective patterns, ensuring that your matches are exactly as intended, no more and no less.
 
