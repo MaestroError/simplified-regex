@@ -42,6 +42,7 @@ console.log(checkWeak); // False
   - [Using Predefined Patterns](#using-predefined-patterns)
   - [Options](#options)
   - [Options List](#options-list)
+  - [Applying Quantifiers](#applying-quantifiers)
 - **[Advanced topics](#advanced-topics)**
   - [Regex Flags](#regex-flags)
   - [Character Sets](#character-sets)
@@ -176,7 +177,7 @@ const result = new RegexBuilder()
 // Returns: true
 ```
 
-### Count
+#### Count
 
 Counts the number of matches and returns it as an integer. Returns `0` if no matches are found.
 
@@ -201,7 +202,7 @@ const result = new RegexBuilder()
 // Returns: 3
 ```
 
-### Replace
+#### Replace
 
 Replaces found matches in the given source string using the provided **callback**.
 
@@ -230,7 +231,7 @@ const result = new RegexBuilder()
 // Returns: "This is a <a href='#test'>#test</a>"
 ```
 
-### ToRegex
+#### ToRegex
 
 Returns the built raw regex as a string. If any [options](#options) are applied, they will **not be included** in the `toRegex` method.
 
@@ -248,7 +249,7 @@ const regex = new RegexBuilder()
 // Returns: "[a-z]+@[a-z]+\.[a-z]{2,4}"
 ```
 
-### Search
+#### Search
 
 The `search` method searches for a **keyword** or **pattern** (including ready-to-use patterns) in multiline text and returns lines where the subject is found. It is especially useful for processing large files like logs or JSON.
 
@@ -305,7 +306,7 @@ const result = new RegexBuilder()
 ] */
 ```
 
-### SearchReverse
+#### SearchReverse
 
 The `searchReverse` method searches for a **keyword** or **pattern** in multiline text and returns every line which **doesn't contain** the subject. It is especially useful for processing large text files like logs or JSON.
 
@@ -331,7 +332,7 @@ const result = new RegexBuilder()
 ] */
 ```
 
-### Swap
+#### Swap
 
 The `swap` method allows you to swap any kind of data logically, for example, build new URLs from old ones. It utilizes the "named groups" regex feature and can be used with a **callback** or **pattern string**.
 
@@ -743,6 +744,122 @@ onlyAlphanumeric(value); // Ensure only alphanumeric characters are included
 ```
 
 These options enhance the functionality and flexibility of `SimplifiedRegex`, enabling you to tailor regex patterns to meet specific requirements or constraints. Whether you're validating user input, parsing text data, or performing complex searches, these options provide the tools you need to achieve precise and efficient regex matching.
+
+## Applying Quantifiers
+
+Quantifiers in regular expressions are symbols or sets of symbols that specify how many instances of a character, group, or character class must be present in the input for a match to be found. SimplifiedRegex enhances the way quantifiers are used, making it simpler and more intuitive to define the frequency of pattern occurrences.
+
+### Optional Elements
+
+To make an element optional, use '?'. This matches zero or one occurrence of the preceding element (`dash` in this example).
+
+```javascript
+// Matches a string that may or may not contain a dash
+const result = new RegexBuilder()
+  .start("123-456")
+  .exact("123")
+  .dash("?")
+  .exact("456")
+  .check();
+// Result would be true in both cases of the string: "123456" & "123-456"
+```
+
+### Specifying a Range
+
+For specifying a range of occurrences, use a string with two numbers separated by a comma '2,5'. This matches the preceding element at least and at most the specified times.
+
+```javascript
+// Matches a string with 2 to 5 spaces
+const result = new RegexBuilder()
+  .start("someText  234")
+  .text()
+  .space("2,5")
+  .digits()
+  .check();
+// Result: the "someText  234" would return true, but the "someText 234" false
+```
+
+### One or More
+
+To match one or more occurrences of an element, use '+', '1+', '1>' or 'oneOrMore'. This ensures the element appears at least once.
+
+```javascript
+// Matches strings with one or more backslashes
+const result = new RegexBuilder().start("\\\\").backslash("1+").check();
+// Result: true (if one or more backslashes are found)
+```
+
+### Zero or More
+
+The '0+' quantifier matches zero or more occurrences of the preceding element.
+
+```javascript
+// Matches strings with zero or more forward slashes
+const result = new RegexBuilder()
+  .start("test258...")
+  .alphanumeric()
+  .dot("0+")
+  .check();
+// Result would be true in both cases of the string: "test258..." & "test"
+```
+
+### Exact Number
+
+To match an exact number of occurrences, directly specify the number.
+
+```javascript
+// Matches strings with exactly 2 underscores
+const result = new RegexBuilder()
+  .start("1235__158")
+  .digits()
+  .underscore("2")
+  .digits()
+  .check();
+// Result would be true in cases of the string: "1235__158", but "1235___158" and "1235_158" will be false
+```
+
+### To Custom Character Sets and Groups
+
+You can apply quantifiers to custom character sets and groups as the second argument after the callback, matching a specific number of occurrences.
+
+```javascript
+// Matches strings with exactly 3 periods or colons
+const regex = new RegexBuilder()
+  .start()
+  .charSet((pattern) => {
+    pattern.period().colon();
+  }, "3")
+  .toRegex();
+// Result: ([\.\:]){3}
+```
+
+### Quantifier Values
+
+In [Special Characters](#special-characters) and [Groups](#groups) - nearly all methods allow quantifiers with values:
+
+- Zero or More = `"zeroOrMore"`, `"0>"`, `"0+"`, `"*"`
+- One or More = `"oneOrMore"`, `"1>"`, `"1+"`, `"+"`
+- Optional (Zero or One) = `"optional"`, `"?"`, `"|"`
+- Exact Amount = `2`, `"5"`
+- Range = `"0,5"`
+
+Example: `->literal("hello world", false, "1+")`
+
+But [Character Classes](#character-classes) have a different approach, let's take `digits` as an example:
+
+```javascript
+// By default, it is set as One or More
+new RegexBuilder().start("12345").digits();
+
+// You can completely remove the quantifier by passing 0 as the first argument
+new RegexBuilder().start("12345").digits(0);
+
+// You can specify the exact amount of digits by passing an integer
+new RegexBuilder().start("12345").digits(5);
+
+// You can specify a range of digits by adding "Range" to the method
+new RegexBuilder().start("12345").digitsRange(1, 5); // Matches from 1 to 5 digits
+```
 
 # Advanced topics
 
@@ -1274,16 +1391,8 @@ SimplifiedRegex is licensed under the MIT License. See the LICENSE file for more
 - Add github actions for automated tests +
 - Write the Docs in Readme.md file +
 - Extend docs +
-- Add Character classess and groups in Docs.
-- Add in Basic Usage topic the "Features" docs with both pattern examples
-  - get
-  - check
-  - checkString
-  - count
-  - toRegex
-  - replace
-  - search
-  - searchReverse
+- Add Character classess and groups in Docs.+
+- Add in Basic Usage topic the "Features" docs with both pattern examples+
 
 ##### GPT rewriting tips
 
